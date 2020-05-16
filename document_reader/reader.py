@@ -1,9 +1,13 @@
 import argparse
 import textract
+import stanza
 import nltk
 import re
 import os
+
 from typing import List
+from textparser import Parser
+
 
 SYMBOLS = ["\n", "\r", "\t", "", u"\xa0"]
 
@@ -20,34 +24,36 @@ def create_extension_from_file_path(file_path: str) -> str:
 
 def get_text_from_file(file_path: str, language: str) -> List[str]:
     extension = create_extension_from_file_path(file_path)
+    encoding = "utf-8"
 
-    text = textract.process(file_path, extension=extension)
-    text = text.decode("utf8")
+    text = textract.process(file_path, extension=extension, encoding=encoding)
+    text = text.decode(encoding)
 
     for symbol in SYMBOLS:
         text = text.replace(symbol, " ")
 
-    text = text.lower()
-    text = nltk.sent_tokenize(text, language=language)
+    nlp = stanza.Pipeline(lang="ru", processors='tokenize', use_gpu=True)
+    text = nlp(text)
 
-    for num in range(len(text)):
-        text[num] = re.sub(r'\(*\)', '', text[num])
-        text[num] = re.sub(r'\[*\]', '', text[num])
+    sentences = []
+    for sentence in text.sentences:
+        sentences.append(sentence.text)
 
     return text
 
 
 def main():
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt')
+    # try:
+    #     nltk.data.find('tokenizers/punkt')
+    # except LookupError:
+    #     nltk.download('punkt')
+    # stanza.download('en') 
+    # stanza.download('ru') 
 
-    file_path = '/home/max/masters_work/data/raw/example.doc'
-
+    file_path = '/home/max/masters_work/data/raw/rus/rus_2.pdf'
     text = get_text_from_file(file_path, "english")
 
-    print(type(text))
+    print(text)
 
 
 if __name__ == '__main__':
