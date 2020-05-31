@@ -1,4 +1,8 @@
 import stanza
+import logging
+import argparse
+
+from copy import copy
 from typing import List
 from io import StringIO
 
@@ -10,9 +14,8 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
 
-from copy import copy
-
-SYMBOLS = ["-", "\n", "\r", "\t", "", u"\xa0"]
+SYMBOLS = ["-", "\n", "\r", "\t", u"\xa0"]
+LANGUAGES = ['ru', 'en']
 
 
 def preprocess_text(text: str) -> str:
@@ -24,9 +27,9 @@ def preprocess_text(text: str) -> str:
     return text
 
 
-def tokenize_text(text: str) -> List[str]:
+def tokenize_text(text: str, language: str = "ru") -> List[str]:
 
-    nlp = stanza.Pipeline(lang="ru", processors='tokenize', use_gpu=True)
+    nlp = stanza.Pipeline(lang=language, processors='tokenize', use_gpu=True)
     stanza_text = nlp(text)
 
     tokenized_text = []
@@ -62,12 +65,33 @@ def save_txt_file(output_path: str, tokenized_text: List[str]) -> None:
 
 
 if __name__ == "__main__":
-    input_path = '/home/max/masters_work/data/raw/rus/rus_2.pdf'
-    output_path = '/home/max/masters_work/data/raw/rus/rus_2.txt'
+    logging.getLogger().setLevel(logging.INFO)
+    parser = argparse.ArgumentParser(description='Read and save text to txt')
+    parser.add_argument('--input_path', help='Path to pdf file', default=None)
+    parser.add_argument('--output_path', help='Path to txt result file', default=None)
+    parser.add_argument('--lang', help = "Language of text", default='en')
 
+    arguments = parser.parse_args()
+
+    input_path = arguments.input_path
+    output_path = arguments.output_path
+    language = arguments.lang
+
+    if input_path is None:
+        raise Exception("input_path is None")
+    if output_path is None:
+        raise Exception("Output_path is None")
+    logging.info("Read text from pdf")
     text = read_text_from_pdf(input_path)
-    text = preprocess_text(text)
-    tokenized_text = tokenize_text(text)
-    save_txt_file(output_path, tokenized_text)
 
-    print(tokenized_text)
+    logging.info("Preprocess text")
+    text = preprocess_text(text)
+
+    logging.info("Tokenize text")
+    if language in LANGUAGES:
+        tokenized_text = tokenize_text(text)
+    else:
+        raise Exception(f"{language} language is not supported")
+
+    logging.info("Save files")
+    save_txt_file(output_path, tokenized_text)
