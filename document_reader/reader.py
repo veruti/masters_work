@@ -8,6 +8,14 @@ import os
 from typing import List
 from textparser import Parser
 
+from io import StringIO
+
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
 
 SYMBOLS = ["\n", "\r", "\t", "", u"\xa0"]
 
@@ -41,6 +49,22 @@ def get_text_from_file(file_path: str, language: str) -> List[str]:
 
     return text
 
+
+def read_text_from_pdf(input_path: str) -> str:
+
+    output_string = StringIO()
+    with open(input_path, 'rb') as in_file:
+        parser = PDFParser(in_file)
+        document = PDFDocument(parser)
+        resource_manager = PDFResourceManager()
+        device = TextConverter(resource_manager, output_string, laparams=LAParams())
+        interpreter = PDFPageInterpreter(resource_manager, device)
+        for page in PDFPage.create_pages(document):
+            interpreter.process_page(page)
+
+    text = output_string.getvalue()
+
+    return text
 
 def main():
     # try:
