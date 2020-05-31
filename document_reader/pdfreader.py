@@ -1,9 +1,6 @@
-import stanza
 import logging
 import argparse
 
-from copy import copy
-from typing import List
 from io import StringIO
 
 from pdfminer.converter import TextConverter
@@ -13,30 +10,10 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
+from src.preprocessing  import preprocess_text, tokenize_text
+from src.saver import save_txt_file
 
-SYMBOLS = ["-", "\n", "\r", "\t", u"\xa0"]
 LANGUAGES = ['ru', 'en']
-
-
-def preprocess_text(text: str) -> str:
-    text = copy(text)
-
-    for symbol in SYMBOLS:
-        text = text.replace(symbol, " ")
-
-    return text
-
-
-def tokenize_text(text: str, language: str = "ru") -> List[str]:
-
-    nlp = stanza.Pipeline(lang=language, processors='tokenize', use_gpu=True)
-    stanza_text = nlp(text)
-
-    tokenized_text = []
-    for sentence in stanza_text.sentences:
-        tokenized_text.append(sentence.text)
-
-    return tokenized_text
 
 
 def read_text_from_pdf(input_path: str) -> str:
@@ -56,20 +33,14 @@ def read_text_from_pdf(input_path: str) -> str:
     return text
 
 
-def save_txt_file(output_path: str, tokenized_text: List[str]) -> None:
-
-    with open(output_path, "w") as file:
-        for sentence in tokenized_text:
-            file.write(sentence)
-            file.write("\n")
-
-
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
+
     parser = argparse.ArgumentParser(description='Read and save text to txt')
+
     parser.add_argument('--input_path', help='Path to pdf file', default=None)
     parser.add_argument('--output_path', help='Path to txt result file', default=None)
-    parser.add_argument('--lang', help = "Language of text", default='en')
+    parser.add_argument('--lang', help="Language of text", default='en')
 
     arguments = parser.parse_args()
 
@@ -89,9 +60,10 @@ if __name__ == "__main__":
 
     logging.info("Tokenize text")
     if language in LANGUAGES:
-        tokenized_text = tokenize_text(text)
+        tokenized_text = tokenize_text(text, language)
     else:
         raise Exception(f"{language} language is not supported")
 
     logging.info("Save files")
     save_txt_file(output_path, tokenized_text)
+    logging.info(f"File saved to {output_path}")
