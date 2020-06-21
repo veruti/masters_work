@@ -1,12 +1,8 @@
-import argparse
 import textract
 import stanza
-import nltk
-import re
 import os
 
 from typing import List
-from textparser import Parser
 
 from io import StringIO
 

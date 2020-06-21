@@ -4,7 +4,7 @@ from copy import copy
 from typing import List
 
 SYMBOLS = ["-", "\n", "\r", "\t"]
-REPLACES = ["", " ", " ", " "]
+REPLACES = ["", "", "", ""]
 
 
 def preprocess_text(text: str) -> str:
