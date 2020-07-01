@@ -2,3 +2,5 @@
 .vscode
 /data/*
 document_reader/src/__pycache__/
+/scientific-paper-summarisation/
+/scisumm-corpus/
