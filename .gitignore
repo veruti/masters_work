@@ -1,6 +1,6 @@
 .idea
 .vscode
 /data/*
-document_reader/src/__pycache__/
+__pycache__/
 /scientific-paper-summarisation/
 /scisumm-corpus/
