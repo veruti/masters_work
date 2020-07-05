@@ -44,6 +44,8 @@ if __name__ == '__main__':
             summary_reference, reference = read_original_text_and_reference_from_filepath(path)
         except ParseError:
             continue
+        except FileNotFoundError:
+            continue
 
         parser = PlaintextParser.from_string(reference, Tokenizer(LANGUAGE))
         stemmer = Stemmer(LANGUAGE)
