@@ -18,6 +18,7 @@ sumy = "*"
 rouge-score = "*"
 pip = "*"
 rouge = "*"
+progressbar2 = "*"
 
 [requires]
 python_version = "3.8"
