@@ -11,7 +11,7 @@ from typing import List
 
 # Main constants
 
-DATA_PATH = "/home/developer/Desktop/masters_work/scisumm-corpus/data/Training-Set-2018/"
+DATA_PATH = "/home/developer/Desktop/masters_work/data/scisumm-corpus/data/Training-Set-2018/"
 REFERENCE_FILE_NAME = "Reference_XML"
 SUMMARY_FILE_NAME = "summary"
 
