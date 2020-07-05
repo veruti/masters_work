@@ -14,17 +14,39 @@ from document_reader.summary_reference_reader import DATA_PATH
 from document_reader.summary_reference_reader import read_original_text_and_reference_from_filepath
 from document_reader.summary_reference_reader import get_folderpaths
 
+# Typings
+from typing import Dict
+
+# Progress bar
+from progressbar import progressbar
+
+# Errors
+from xml.etree.ElementTree import ParseError
+
+
 LANGUAGE = "english"
 SENTENCES_COUNT = 15
 
-rouge = Rouge()
+scorer = Rouge()
 
-for path in get_folderpaths(DATA_PATH):
-    try:
-        summary_reference, reference = read_original_text_and_reference_from_filepath(path)
+
+if __name__ == '__main__':
+    references = []
+    summaries = []
+
+    folder_paths = get_folderpaths(DATA_PATH)
+    n_folders = len(folder_paths)
+
+    for n_paper in progressbar(range(n_folders)):
+        path = folder_paths[n_paper]
+
+        try:
+            summary_reference, reference = read_original_text_and_reference_from_filepath(path)
+        except ParseError:
+            continue
+
         parser = PlaintextParser.from_string(reference, Tokenizer(LANGUAGE))
         stemmer = Stemmer(LANGUAGE)
-
         summarizer = KLSummarizer(stemmer)
         summarizer.stop_words = get_stop_words(LANGUAGE)
 
@@ -32,6 +54,8 @@ for path in get_folderpaths(DATA_PATH):
         for sentence in summarizer(parser.document, SENTENCES_COUNT):
             summary += str(sentence) + " "
 
-        print(rouge.get_scores(summary, reference))
-    except:
-        pass
+        references.append(reference)
+        summaries.append(summary)
+
+    metrics = scorer.get_scores(summaries, references, avg=True)
+    print(metrics)
