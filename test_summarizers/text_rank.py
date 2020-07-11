@@ -31,7 +31,7 @@ scorer = Rouge()
 
 
 if __name__ == '__main__':
-    references = []
+    summary_references = []
     summaries = []
 
     folder_paths = get_folderpaths(DATA_PATH)
@@ -56,8 +56,8 @@ if __name__ == '__main__':
         for sentence in summarizer(parser.document, SENTENCES_COUNT):
             summary += str(sentence) + " "
 
-        references.append(reference)
+        summary_references.append(summary_reference)
         summaries.append(summary)
 
-    metrics = scorer.get_scores(summaries, references, avg=True)
+    metrics = scorer.get_scores(summaries, summary_references, avg=True)
     print(metrics)
